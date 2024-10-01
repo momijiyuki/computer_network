@@ -1,0 +1,110 @@
+\section{コンピュータネットワーク概観}
+
+\subsection{コンピュータネットワークの構成}
+
+\subsubsection{インターネットの構成}
+
+\begin{itemize}
+  \item エンドシステム (end system)
+  \begin{itemize}
+    \item ネットワークに接続しているコンピュータ
+    \item ホストともいう
+    \item クライアントとサーバに分類されることが多い
+  \end{itemize}
+  \item クライアント\\
+    サービス要求を出す
+  \item サーバ\\
+    サービス要求を待ち受ける
+  \item 通信リンク\\
+    光ファイバ、電波、同軸ケーブル、etc...
+  \item ルータ\\
+    パケットの中継装置
+  \item \textcolor{cyan}{ここまでがモノ}
+  \item プロトコル\\
+    二つ以上の通信エンティティ間でやりとりされるメッセージの形式と順序などを取り決める規約\\
+    \textcolor{cyan}{ネットワークの機器間でのやり取りにおけるルール}
+\end{itemize}
+
+\newpage
+\subsubsection{通信サービス}
+
+エンドシステム間で情報をやり取りするための仕掛け
+\begin{itemize}
+  \item \textcolor{orange}{コネクション指向型サービス}\\
+    クライアントとサーバは、通信を始める前に相互に制御パケットを送信\\
+    \textcolor{cyan}{通信前にハンドシェイク}
+    \begin{itemize}
+      \item \textcolor{orange}{高信頼データ転送}\\
+        順序通り、誤りなく伝送
+      \item \textcolor{orange}{フロー制御}\\
+        受信側のバッファを溢れさせない\\
+        \textcolor{cyan}{空きバイト数をフィードバック}
+      \item \textcolor{orange}{輻輳制御}\\
+        ネットワークの混雑を防ぐ
+    \end{itemize}
+    代表的なプロトコルは、TCP (Transmission Control Protocol)
+  \item \textcolor{orange}{コネクションレス型サービス}\\
+    事前の制御パケットのやり取りなしにいきなりデータを送る\\
+    代表的なプロトコルは
+    \begin{itemize}
+      \item UDP (\textcolor{orange}{User Datagram Protocol})
+      \item リアルタイムアプリケーション向き
+      \item 高い自由度をもつ
+    \end{itemize}
+    \textcolor{cyan}{高信頼性が無駄なときや、トランスポート層をアプリケーションからいじることができる(TCPをいじりたければOSアップデートが必要)}
+\end{itemize}
+
+\newpage
+\subsection{ネットワークコア}
+エンドシステム間の相互接続を担うルータ群
+
+
+\subsubsection{回線交換}
+エンドシステム間の通信のために経路に沿った通信資源(バッファや帯域の一部)をセッション中常時常時占有
+
+\textcolor{cyan}{予め通信経路を予約して占有}
+
+
+\subsubsection{パケット交換}
+パケット(oacket)
+\begin{itemize}
+  \item アプリケーションレベルのメッセージを分割したもの
+  \item ネットワークコアでの伝送単位
+\end{itemize}
+\underline{蓄積交換伝送}
+\begin{itemize}
+  \item 各ルータで到着したパケットを一旦、バッファへ格納
+  \item 予め定められた順序(先着順など)に従い、順次パケットを伝送
+\end{itemize}
+
+\subsubsection{回線交換 vs パケット交換}
+
+パケット交換の長所
+\begin{itemize}
+  \item 伝送容量を効率的に利用可能
+  \item 実装が容易 \textcolor{cyan}{ルータに送るだけ}
+\end{itemize}
+
+回線交換の長所
+\begin{itemize}
+  \item 通信品質が安定、リアルタイムアプリケーション向き\\
+  \textcolor{cyan}{通信を占有するため、安定性が求められるとき}
+\end{itemize}
+
+\begin{table}[h]
+  \centering
+  \caption{回線交換とパケット交換の長所}
+  \label{tab:packet}
+  \begin{tabular}{c|l|l}\hline
+    & 回線交換 & パケット交換\\\hline
+    長所
+    & \begin{tabular}{c}
+        通信品質が安定\\
+        リアルタイムアプリケーション向き
+      \end{tabular}
+    & \begin{tabular}{c}
+      伝送容量を効率的に利用可能\\
+      実装が容易
+    \end{tabular}\\\hline
+  \end{tabular}
+\end{table}
