@@ -1,0 +1,114 @@
+\section{アプリケーション層プロトコル}
+
+\subsection{基礎}
+\subsubsection{アプリケーション層プロトコル}
+
+\begin{itemize}
+  \item ネットワークアプリケーション: ネットワークの使用を前提とするソフトウェア
+  \begin{itemize}
+    \item[例)] Webアプリケーションは、ブラウザ(Chrome, Safariなど) とWebサーバ (Apacheなど) の複数のソフトウェアから構成
+    \item[] \textcolor{cyan}{Webサーバは他にも nginxとか}
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+  \item アプリケーション層プロトコルは。メッセージ交換方法やメッセージのタイプ・フォーマットを規定
+  \begin{itemize}
+    \item[例)] webでは HTTP を使用
+  \end{itemize}
+  \item ネットワークアプリケーションは一般にクライアントとサーバの両方の側面をもつ (WebブラウザとWebサーバの関係)
+  \item ネットワークを介した \textcolor{orange}{プロセス間通信}
+  \item[] \textcolor{cyan}{プロセス間通信は実際には1つ下の層であるトランスポート層が提供 (自由度が高いらしい)}
+  \begin{itemize}
+    \item 二つのエンドシステムにあるプロセス間でネットワークを介してやり取り
+    \item ソケット (Socket) と呼ばれる仮想的なインターフェースを用いる
+    \begin{itemize}
+      \item ソケットはAPI (Application Programming Interface) の一種
+      \item トランスポート層とのインターフェースの役割
+    \end{itemize}
+  \end{itemize}
+  % 黒板の改ページ
+  \item コネクション (フロー) の単位
+  \begin{itemize}
+    \item[※] アプリケーション層が割り当てる情報
+    \begin{itemize}
+      \item 送受信ホストの \undercolor{IPアドレス}  % 1, 2
+      \item プロセスの送受信 \undercolor{ポート番号} % 3, 4
+      \begin{itemize}
+        \item[$\rightarrow$] ホストのどのプロセスかを特定する番号
+      \end{itemize}
+      \item サーバ側プロセスは多くの場合ポート番号が固定
+      \begin{itemize}
+        \item 1023番まではwell-knownポートとして予約 (HTTP:80. SMTP:25, DNS:53 など)
+      \end{itemize}
+    \end{itemize}
+  \end{itemize}
+  \item トランスポート層プロトコル \undercolor{(TCP, UDP)}  % 5
+  \item[] \textcolor{cyan}{同じポート番号でもプロトコルが違えば使用可能}
+\end{itemize}
+% 1,2,3,4,5 をまとめてなんか言ってた
+% ５個情報送るよって話
+
+\newpage
+\subsubsection{トランスポート層プロトコルから提供されるサービス}
+
+アプリケーション製作者は、「データ損失」「帯域幅」「遅延」の観点から選択
+
+\begin{itemize}
+  \item TCPサービス
+  \begin{itemize}
+    \item コネクション指向型: 全2重コネクション。ハンドシェイクを待ってから通信
+    \item 高信頼データ伝送: 誤りのない、正しい順序のデータ送信を保証
+    \item 輻輳制御: ネットワークの混雑に合わせて伝送レートを変更
+  \end{itemize}
+  \item UDPサービス
+  \begin{itemize}
+    \item 最小限のデータ伝送: メッセージの到達性や正確性は保証しない
+    \item コネクションレス型: ハンドシェイクは行わない
+    \item 輻輳制御なし: 伝送レートは始点プロセスで指定
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{アプリケーション層プロトコルの分類}
+
+プル型、プッシュ型
+\begin{itemize}
+  \item プル型プロトコル
+  \begin{itemize}
+    \item HTTP, FTPなど
+    \item ユーザが必要に応じて情報を引き出す (サーバが情報通信)
+    \item 情報取得を希望するクライアントがコネクションを開始
+    \end{itemize}
+  \item プッシュ型プロトコル
+  \begin{itemize}
+    \item SMTPなど: (メールを送る側が相手へ情報送信)
+    \item 情報発信する側がコネクションを開始
+  \end{itemize}
+\end{itemize}
+
+個別帯域、共通帯域
+\begin{itemize}
+  \item 個別帯域 (out-of-band) 方式
+  \begin{itemize}
+    \item 制御用とデータ用で別のコネクションを使用\\
+    \textcolor{cyan}{大きなファイルのアップロードの際に制御情報を別ルートで送ることができる}
+    \item 代表例はFTP \textcolor{cyan}{Webページの更新など}
+  \end{itemize}
+  \item 共通帯域 (in-band 方式)
+  \begin{itemize}
+    \item 制御用とデータ用で同じコネクションを使用
+      \textcolor{cyan}{(TCPを想定)}
+    \item 代表例はHTTP
+  \end{itemize}
+\end{itemize}
+
+個別帯域の例
+\begin{itemize}
+  \item 個別帯域の考え方は色々な場合に存在
+  \item OpenFlow
+  \item 5GのC/U 分離 (フェムトセル) \textcolor{cyan}{control, user \url{https://jirei.bzlog.jp/5g/information_14/}}
+  \begin{itemize}
+    \item マクロセルで制御信号をやり取り
+    \item フェムトセルで高速データ転送
+  \end{itemize}
+\end{itemize}
