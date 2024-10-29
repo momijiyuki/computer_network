@@ -1,0 +1,107 @@
+\subsection{WebとHTTP}
+\subsubsection{HTTPの概要}
+
+\begin{itemize}
+  \item HTTP(Hypertext Transfer Protocol):\\
+    Web用のアプリケーション層プロトコル
+  \item Web ページ:\\
+    基本となるHTMLファイルと、いくつかのWebオブジェクトの集合体\\
+    URLにはホスト名やパス名、ファイル名が含まれる
+  \item Webオブジェクト: HTMLファイル, 各種画像, JavaScript, 音声データ, 動画など
+  \item Webブラウザ: Webページを表示するHTTPクライアント(Chrome, Safari, Edge, Firefox など)
+  \item Webサーバ: Webオブジェクトを蓄えるHTTPサーバ(Apacheなど)
+\end{itemize}
+
+\begin{itemize}
+  \item HTTPは、WebブラウザがWebサーバに対しWebページを要求する方法やサーバがそれに対して返送するための方法を定義
+  \begin{itemize}
+    \item 基本的に、クライアントがHTTP requestメッセージを送り、サーバがHTTP responseメッセージを返す % 板書だとresponce: たいぽ？
+  \end{itemize}
+  \item トランスポート層プロトコルはTCP\\
+    (ソケットに渡したあとは到達性が保証される)
+  \begin{enumerate}  % [(i), (ii), (iii), (iv)]
+    \item クライアントがサーバのポート 80 へTCPコネクションを要求
+    \item サーバとクライアントの間でTCPコネクションを確立
+    \item HTTPメッセージをクライアント・サーバ間で交換
+    \item TCPコネクションをクローズ
+  \end{enumerate}
+\end{itemize}
+
+\begin{itemize}
+  \item HTTPはステートレス(stateless)なプロトコル
+  \begin{itemize}
+    \item サーバはクライアントの履歴情報を記憶しない\\
+      例えば同じクライアントから、同じ要求が2回届くとサーバは同じレスポンスを2回返す
+    \item 制御が軽く、同時に多数のHTTP要求に対応可能\\
+      状態を記憶する場合、状態の維持や故障・切断時の処理定義が別途必要
+  \end{itemize}
+  \textcolor{cyan}{ステートレス:履歴をもたない (一昔前のチャットボットみたいな感じ？)}\\
+  \textcolor{cyan}{webの情報はクライアント側が保持(cookie?)}
+\end{itemize}
+
+\subsubsection{非継続型コネクションと継続型コネクション}
+
+\begin{itemize}
+  \item 非継続型コネクション( non-persistent connection)
+  \begin{itemize}
+    \item 一つのTCPコネクションは一つのWebオブジェクトを転送
+    \item 通常ブラウザは並列して5から10のTCPコネクションをはれるが埋まっていれば、各オブジェクトは直列に処理される
+    \item HTTP/1.0で使用
+  \end{itemize}
+
+  \begin{itemize}
+    \item 非継続型の欠点
+    \begin{itemize}
+      \item 多くのTCPコネクションをサーバが管理する必要
+      \item 各オブジェクトの転送に、2RTT必要(TCPコネクションの確立に1RTT要する)
+      \item[] ※ RTT(Round Trip Time: 往復遅延時間)
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+  \item 継続型コネクション(Persistent connection)
+  \begin{itemize}
+    \item 一つのコネクションで複数のWebオブジェクトを転送
+    \item サーバは応答を返した後もTCPコネクションを継続
+    サーバで認定された一定時間(タイムアウト時間)使用されたなければコネクションを切断
+    HTTP/1.1 のデフォルト
+  \end{itemize}
+\end{itemize}
+
+パイプライン処理
+\begin{itemize}
+  \item 非パイプライン処理型 (without pipelinig)
+  \begin{itemize}
+    \item クライアントは応答メッセージの受信を待ってから、次の要求メッセージを送信
+  \end{itemize}
+  \item パイプライン処理型 (with pipelinig)
+  \begin{itemize}
+    \item クライアントは応答メッセージを受け取るまえに、次々と要求メッセージを送信可能
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{HTTPメッセージ}
+
+\begin{itemize}
+  \item 2種類のメッセージ: リクエスト(要求), レスポンス(応答)
+  \item HTTPリクエストメッセージ
+  \begin{itemize}
+    \item \begin{tabbing}
+      リクエスト行: \=HTTPメソッド(GET, POSTなど)\\
+      \>リクエスト対象(URL) \\
+      \>HTTPバージョン
+    \end{tabbing}
+    \item ヘッダ行   : user agent などを key:value形式でストア
+    \item 本文
+  \end{itemize}
+  \item HTTP応答メッセージ
+  \begin{itemize}
+    \item \begin{tabbing}
+      ステータス行: \=ステータスコード(200, 403, 404, 503など)\\
+      \> ステータス文字列(OK, Permission Denied, Not Found, Service Unavailable など)
+    \end{tabbing}
+    \item ヘッダ行: ViaやContent-lengthなどを key:value形式でストア
+    \item 本文
+  \end{itemize}
+\end{itemize}
