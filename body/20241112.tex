@@ -1,0 +1,117 @@
+\subsubsection{HTTP/2}
+
+2015年5月にRFC文書化された新しいHTTPのバージョン (5年ぶりのアップデート)
+
+\begin{itemize}
+  \item \begin{tabbing}ストリ\=ーム: \=コネクション上にレスポンスとリクエストが多重化された仮想的な双方向シーケンス\\
+      \>ストリームの多重化により、オブジェクトの同時送受信が可能\\
+      \>\>\textcolor{orange}{$\rightarrow$ HoL (Head of Line) ブロッキング} \footnotemark の解消\\  %ホルブロッキング
+    \>(例えば Apache では、100ストリームの多重化が可能)
+  \end{tabbing}\footnotetext{
+        HoLブロッキング問題: レスポンスにおいて、リクエストの順に返す必要があるため、大きなオブジェクトの伝送が詰まると待ち時間が発生してしまう
+      }
+    % ※HoLブロッキング問題: レスポンスにおいて、リクエストの順に返す必要があるため、大きなオブジェクトの伝送が詰まると待ち時間が発生してしまう
+  \item HPACkによるHTTPヘッダの圧縮 (二回目以降は差分で通信)\\
+  \textcolor{cyan}{サーバなど大規模なものであればヘッダの圧縮の効果が大きい}
+  \begin{itemize}
+    \item[※] HTTP/1.1ではコンテンツのみ.gz圧縮
+  \end{itemize}
+  \item HTTP/2フレーム: フレームという形式のバイナリデータによる通信(これまでは全てテキストベース)
+  \begin{itemize}
+    \item HTTPヘッダとデータをそれぞれフレーム単位で分割(ヘッダ圧縮にも対応)
+    \item フレーム分割や圧縮は HTTP/1.X のメッセージに対し透過的(HTTPの下層に配置。アプリケーションの製作者は通常どおりにHTTPを利用すればよい)\\
+    \textcolor{cyan}{アプリケーション層とトランスポート層の間で動作。アプリケーション層では通常のHTTPとして処理されるため、HTTP/1.1でも動作する}
+  \end{itemize}
+  \item サーバプッシュ(レスポンスに必要なデータを事前にサーバからクライアントへ送信)\\
+  \textcolor{cyan}{GETリクエストが来た際に必要そうなものを予め送信}
+  \item ストリームの優先制御
+  \item HTTP/2は、ほとんどの主要ブラウザがサポート\\
+  \textcolor{cyan}{10年前の技術であるためサポートされているが、そこまで早くする必要性がない場合もありHTTP/1も現役}
+  \item TCP以外でも動作を想定
+\end{itemize}
+
+\newpage
+\subsubsection{HTTPストリーミングとDASH}
+
+\begin{tabbing}
+  DASH\= (Dynamic Adaptive Streaming over HTTP)\\
+  \>※正式にはMPEGDASH
+\end{tabbing}
+
+\begin{itemize}
+  \item 動画ファイルを異なるビットレートを持つ複数のバージョンにエンコード(圧縮)\\
+    \textcolor{cyan}{動画の場合は画像毎の差分をとったりして圧縮}
+  \item セグメントに分割され、サーバ側で保持(数秒から数十秒単位)
+  \item クライアントは、帯域に応じて、\textcolor{cyan}{(動的に)} 適切な圧縮率のセグメントをリクエスト\\
+    (混んでいるときは、低品質を選ぶ)
+  \item HTTPサーバはMPD (Media Presentation Description)保持 \textcolor{cyan}{(MPDという設定ファイル)}
+  \begin{itemize}
+    \item 各バージョンのセグメントのURLを記載
+    \item クライアントは、最初にMPDをリクエスト
+  \end{itemize}
+  \item 各セグメントの取得は、通常のHTTP GET でリクエスト
+  \item \textcolor{cyan}{appleはMPEG DASHには対応せずHLSという別の規格が存在\\
+    \url{https://www.cloudflare.com/ja-jp/learning/video/what-is-mpeg-dash/}
+  }
+\end{itemize}
+
+
+\subsection{FTP}
+
+\begin{itemize}
+  \item 個別帯域(out-of-band)方式のプロトコル
+  \item データ転送に利用
+  \item 二つのコネクションを利用
+  \begin{itemize}
+    \item 制御コネクション: ポート21、継続型
+    \begin{itemize}
+      \item ユーザ認証、cd、put、getなどのコマンド
+    \end{itemize}
+    \item データコネクション: ポート20、非継続型
+    \begin{itemize}
+      \item 実際のファイル転送を担う
+      \item \textcolor{cyan}{1ファイルずつ、必要に応じて}
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\newpage
+\subsection{電子メール}
+
+構成要素
+\begin{itemize}
+  \item ユーザエージェント (メーラ)  % thunder birdとか
+  \item メールサーバ (postfixなど)
+  \item \begin{tabbing}
+    プロトコル: \=SMTP(Simple Mail Transfer Protocol)\\
+    \>メールアクセスプロトコル
+  \end{tabbing}
+  \item 始点エージェントサーバ間およびサーバ間の通信はSMTPを使用
+  \item メールサーバ終点エージェント間はメールアクセスプロトコルを使用
+  \begin{itemize}
+    \item POP3 (Post Office Protocol ver.3)
+    \item IMAP (Internet Mail Access Protocol)
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{SMTP}
+
+\begin{itemize}
+  \item 始点側メールサーバ (クライアント) から終点側メールサーバへのメッセージ転送
+  \item データ形式は7ビットASCIIコード
+  \begin{enumerate}
+    \item クライアントはサーバにポート25番でTCP接続
+    \item アプリケーション層でハンドシェイク
+    \begin{enumerate}
+      \item クライアントが送信元アドレスを知らせ、サーバ送信許可を返す
+      \item クライアントは宛先アドレスをサーバへ知らせ、サーバは、宛先アカウントの有無をクライアントに通知
+    \end{enumerate}
+    \item クライアントはデータ送信開始を通知し、サーバの返答を受け取ると送信開始
+    \item 送信終了後、TCPコネクションを切断
+  \end{enumerate}
+  \item TCPコネクションは継続型
+  \begin{itemize}
+    \item[] 同じサーバ宛のメールが複数あれば、同じコネクションを使って送信可能
+  \end{itemize}
+\end{itemize}
+
