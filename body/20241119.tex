@@ -1,0 +1,145 @@
+\subsection{DNS (Domain Name System)}
+
+\begin{itemize}
+  \item ネームサーバによる階層的データベース
+  \item ホストとネームサーバ間の通信を担うアプリケーション層プロトコル
+\end{itemize}
+
+\subsubsection{提供されるサービス}
+
+\begin{itemize}
+  \item ホスト名をIPアドレスに変換 (\textbf{名前決定})
+  \item ホスト名の別名 (alias: エイリアス) の登録
+  \item メールサーバ名の別名登録
+\end{itemize}
+
+\begin{itemize}
+  \item DNSラウンドロビン: 負荷分散
+  \begin{itemize}
+    \item 公式ホスト名と複数のミラーサーバのIPアドレスの集合を対応づけ問い合わせ毎にIPアドレスをシフトして通知\\
+      (クライアントはリストの一番上を使う)
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{DNSの仕組み}
+
+\begin{itemize}
+  \item \textbf{なぜ集中型でないか}
+  \item 分散型モデル(ネームサーバの分類)
+  \begin{itemize}
+    \item 障害発生時の信頼性欠如(single point of failure)
+    \item サーバへのトラヒック集中
+    \item 遠隔地との通信遅延が大きい
+    \item 保守更新の煩雑さ
+  \end{itemize}
+  \item 分散型モデル(ネームサーバの分類)
+  \begin{itemize}
+    \item ルートDNSサーバ(世界で13系統)
+    \begin{itemize}
+      \item トップレベルDNSサーバのIPアドレスを把握
+    \end{itemize}
+    \item トップレベルドメイン(top-level domain)DNSサーバ
+    \begin{itemize}
+      \item jp, com, eduなどのトップレベルドメインを管理
+    \end{itemize}
+    \item 権威(Authoritative)DNSサーバ
+    \begin{itemize}
+      \item ホスト名(ドメイン名)とIPアドレスの変換機能を持つ
+      \item 各ホストは必ず一つ以上の権威DNSサーバに登録
+    \end{itemize}
+    \item[※] ローカルDNSサーバ:DNSキャッシュサーバ、DNSリゾルバ
+    \begin{itemize}
+      \item ISPや各企業が個別に持つ
+      \item ユーザは通常、ローカルDNSサーバに名前解決を依頼
+    \end{itemize}
+  \end{itemize}
+  \item DNS反復クエリとDNS再帰クエリ
+  \begin{itemize}
+    \item DNS反復クエリ
+    \begin{itemize}
+      \item 問い合わせたネームサーバへの名前の解決を依頼
+    \end{itemize}
+    \item DNS再帰クエリ
+    \begin{itemize}
+      \item 問い合わせるべきネームサーバの情報を要求
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\begin{itemize}
+  \item ローカルDNSサーバはホストへ転送した情報をキャッシュする:DNSキャッシュ
+  \item DNSレコード
+  \begin{itemize}
+    \item リソースレコードを格納する分散データベース
+    \item (name, value, type, ttl)の4フィールドで構成
+    \item Type A レコード
+    \begin{itemize}
+      \item nameはホスト名, valueはIPadoresu (IPv6の場合、AAAAレコード)
+    \end{itemize}
+    \item Type NS レコード
+    \begin{itemize}
+      \item nameはドメイン名, valueはその権威DNSサーバホスト名
+    \end{itemize}
+    \item Type CNAMEレ コード
+    \begin{itemize}
+      \item ホスト名の別名
+    \end{itemize}
+    \item Type MX レコード
+    \begin{itemize}
+      \item nameに関するメルサーバ情報を格納
+    \end{itemize}
+  \end{itemize}
+  \item TTLは秒単位で記載
+  \begin{itemize}
+    \item この期間を過ぎるとキャッシュから削除
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{DNSサーバへの攻撃}
+\begin{itemize}
+  \item DNSキャッシュポイズニング
+  \begin{enumerate}
+    \item 攻撃者がDNSキャッシュサーバへ名前解決を依頼
+    \item DNSキャッシュサーバは再帰的に問合せ
+    \item 攻撃者は即座に、偽装したUDPパケットで返答
+    \item キャッシュサーバは、誤ったドメイン情報を記憶
+  \end{enumerate}
+  \item[※] 攻撃要件
+  \begin{enumerate}
+    \item 発信元DNSサーバのIPアドレスに偽装
+    \item 問い合わせと同じUDPポート番号を使用
+    \item 問い合わせと同じID(6/bit)を使用
+    \item 本来のDNSサーバより先に応答
+    \begin{itemize}
+      \item さらに、攻撃のチャンスはTTL毎に一度だけ
+    \end{itemize}
+  \end{enumerate}
+\end{itemize}
+
+\newpage
+\subsection{コンテンツ分散}
+
+\begin{itemize}
+  \item コンテンツが一つのサーバ上のみにあると
+  \begin{itemize}
+    \item 伝送遅延が増大
+    \item サーバへの負担が大きい
+  \end{itemize}
+  \item コンテンツ分散
+  \begin{itemize}
+    \item コンテンツをインターネット上の複数サーバにコピー
+    \item ユーザに最も迅速に配送できるサーバを見つけ、コンテンツを配信
+  \end{itemize}
+\end{itemize}
+
+\subsubsection{CDN (Content Distribution Network)}
+\begin{itemize}
+  \item 90年代後半から登場したビジネスモデル
+  \item CDNサービス企業は、インターネット上に多数のサーバ(CDNサーバ)を配置
+  \begin{itemize}
+    \item (NetfrixやYoutubeは自社でCDNサーバを設置)
+    \item 顧客のコンテンツをCDNサーバにコピー(各更新毎に)
+    \item ユーザのコンテンツを要求に対して、適切なCDNサーバを選択
+  \end{itemize}
+  \item[$\rightarrow$] \textbf{ユーザごとにDNSの返答を変える}
+\end{itemize}
