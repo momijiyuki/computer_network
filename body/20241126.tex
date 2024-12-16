@@ -1,0 +1,147 @@
+\section{トランスポート層}
+
+\subsection{トランスポート層サービス}
+
+アプリケーションプロセスへ、通信サービスを直接提供
+\begin{itemize}
+  \item アプリケーションを実行するエンドシステムに組み込まれている
+  \item ネットワーク内のルータには通常組み込まれない
+\end{itemize}
+
+\undercolor{アプリケーションプロセス}間に、\undercolor{論理的通信路}を提供
+\begin{itemize}
+  \item アプリケーションは、物理的通信インフラの構造を意識しない
+\end{itemize}
+
+
+\subsubsection{トランスポート層とネットワーク層の関係}
+
+ネットワーク層: \undercolor{ホスト間}の\undercolor{論理的通信路}を提供
+\begin{itemize}
+  \item[] インターネット (IP) では、\undercolor[black]{ベストエフォート}
+  \footnote{何も保証しない}
+  型転送サービス
+\end{itemize}
+アプリケーションから見たとき、トランスポート層がないと、
+\begin{itemize}
+  \item アプリケーション固有の要求に応じた適切な通信サービスが受けられない
+  \item 物理的特性あるいはネットワークの輻輳により、通信インフラの信頼性が低い場合に対処できない
+\end{itemize}
+
+% メモリ上に展開されてプロセスとなる、トランスポート層はプロセス間の通信を担う
+% ネットワーク層は基本的には端末から端末への通信を担う
+
+
+\subsubsection{インターネットのトランスポート層}
+
+最小限度の機能 (UDP, TCPともに備える)
+\begin{itemize}
+  \item プロセス間の転送サービス
+  \item \undercolor[black]{セグメント}\footnote{
+      トランスポート層PDU
+    }の伝送誤り検査
+\end{itemize}
+
+UDP (User Datagram Protocol): 信頼性を保証しないコネクションレス型サービス
+\begin{itemize}
+  \item[] 最小限度の機能のみを持つ
+\end{itemize}
+
+TCP (Transmission Control Protocol): 信頼性の高い、コネクション指向型サービス
+\begin{itemize}
+  \item[] 最小限度の機能に加えて
+  \begin{itemize}
+    \item 誤りのない、正しい順序でのセグメント転送を保証
+    \item 輻輳制御とフロー制御による、送信レート制御を提供
+  \end{itemize}
+\end{itemize}
+
+
+\newpage
+\subsection{多重化と逆多重化}
+% 一旦文字列の幅を確認したいから、ここに内容はないけどやや長めの文章を書いていこうと思う。お気持ち的な文章は内容の割に長さを稼げるように思う
+\begin{tabbing}
+  タブ調整用の文字列、これは\=表示されない \kill
+  \measuretab{タブ調整用の文字列、これは}
+  % 多重化 (multiplexing): \>様々なソケット (アプリケーションとのインターフェース) からトランスポート層\\\>へ送出されたセグメントをまとめてネットワーク層へ引き渡す\\
+  多重化 (multiplexing): \>\wraptab{様々なソケット (アプリケーションとのインターフェース) からトランスポート層へ送出されたセグメントをまとめてネットワーク層へ引き渡す}\\
+
+  逆多重化 (demultiplexing): \>ネットワーク層から取り出されたセグメントを適切なソケットへ渡す
+\end{tabbing}
+
+ポート番号: ソケットを識別する番号 (0から 65535 ($2^{16}-1$))
+\begin{itemize}
+  \item 0 から 1023 までは well-known ポート番号として予約
+  \item TCP と UDP で区別 (両者で同じ番号が使える)
+\end{itemize}
+
+クライアントがUDPあるいはTCPソケットを作り、ポート番号を付加\\
+\indent(通常は 1024 番号以降からランダムに選択)
+
+サーバ側では well-known ポート番号を使用
+
+
+\subsubsection{UDP}
+
+% クライアント: 始点ポート番号と終点ポート番号をヘッダに付加し、(ソケットへbindし)多重化
+
+% サーバ: 終点ポート番号 (とIPアドレス) のみに基づいてソケットを選択
+
+%         (異なるクライアントからのセグメントでも同じソケットへ渡される)
+%         始点ポート番号は、返信の際の終点ポート番号として使用
+\begin{tabbing}
+
+クライアント: \=始点ポート番号と終点ポート番号をヘッダに付加し、(ソケットへbindし)多重化\\
+サーバ: \>終点ポート番号 (とIPアドレス) のみに基づいてソケットを選択\\
+        \>(異なるクライアントからのセグメントでも同じソケットへ渡される)\\
+        \>始点ポート番号は、返信の際の終点ポート番号として使用
+\end{tabbing}
+
+
+
+\subsubsection{TCP}
+
+クライアント: UDPと同じ
+
+サーバ: 始点IPアドレス、始点ポート番号、終点IPアドレス、終点ポート番号でソケットを選択
+
+
+\subsection{UDP}
+
+\begin{itemize}
+  \item 8バイトのヘッダ + ペイロード ( = アプリケーション層メッセージ)
+  % figure 中央16bitずつ
+  % |<----------32  bit---------->|
+  % | 始点ポート番号| 終点ポート番号|
+  % |セグメントの長さ|チェックサム  |
+  % | アプリケーション層メッセージ  |
+
+  \input{image/udp_payload.tex}
+
+  \item 受信側でチェックサムを用いて誤り検出を行う
+  \begin{itemize}
+    \item[] チェックサム: 16ビット語を全て足したものの1の補数
+  \end{itemize}
+  \item これ以外は何もせず、必要最低限のトランスポート層サービスを提供
+  \begin{itemize}
+    \item メッセージを直接IP層へ渡す
+  \end{itemize}
+  \item[] 使用例: DNS, SNMPなど
+\end{itemize}
+
+\begin{itemize}
+  \item \undercolor[black]{UDPを用いる利点}
+  \begin{enumerate}
+    \item 送るべきデータとその送出タイミングをアプリケーションから制御可能
+    \begin{itemize}
+      \item TCPの制約から解放、高信頼データ転送は、必要に応じてアプリケーション側で実装
+    \end{itemize}
+    \item コネクションの確立が不要: 遅延の減少
+    \item コネクションの管理が不要
+    \begin{itemize}
+      \item[] サーバでのオーバヘッドが小さく、多くのクライアントと通信可能
+    \end{itemize}
+    \item ヘッダが小さく、伝送効率が高い (UDP 8バイト, TCP 20バイト)
+  \end{enumerate}
+\end{itemize}
+% tcp -> udpの順にできた

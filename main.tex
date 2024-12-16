@@ -10,17 +10,37 @@
 \usepackage{wrapfig}
 \usepackage{url}
 \usepackage{amsmath}
-\usepackage{mathtools}
+% \usepackage{mathtools}
 \usepackage{Tabbing}
 \usepackage{footnote}
+% \usepackage{currfile}
+% \usepackage{fancyhdr}
 
 \newcommand{\undercolor}[2][orange]{
-  \textcolor{#1}{\underline{
-    \textcolor{black}{#2}
-  }}
+  \textcolor{#1}{\underline{\textcolor{black}{#2}}}
 }
 
+\newlength{\tabpos}
+\newlength{\remainwidth}
+
+\newcommand{\measuretab}[1]{%
+  \settowidth{\tabpos}{#1}%
+  \global\setlength{\remainwidth}{\textwidth}
+  \global\addtolength{\remainwidth}{-\tabpos}
+}
+
+\newcommand{\wraptab}[1]{
+  \parbox[t]{\remainwidth}{#1}
+}
+
+
+\pagestyle{headings}
+% \pagestyle{plain}
+% \renewcommand{\headrulewidth}{0pt}
+% \fancyfoot[L]{\currfilename}
 \begin{document}
+% \thispagestyle{fancy}
+\markboth{\jobname}{\jobname}
 \title{コンピュータネットワーク}
 \date{}
 \author{}
@@ -39,5 +59,11 @@
 \input{body/20241112.tex}
 \newpage
 \input{body/20241119.tex}
+\newpage
+\input{body/20241126.tex}
+\newpage
+\input{body/20241203.tex}
+\newpage
+\input{body/20241210.tex}
 
 \end{document}
